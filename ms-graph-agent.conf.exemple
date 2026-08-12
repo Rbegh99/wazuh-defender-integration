@@ -1,0 +1,40 @@
+<!--
+  Block to insert into the COLLECTOR AGENT's ossec.conf (not the manager),
+  right before the closing </ossec_config> tag.
+
+  IMPORTANT:
+  - Replace the <placeholder> values with your real Azure AD values.
+  - NEVER commit this file once filled in with real values.
+  - One agent = one tenant. For multiple client tenants, duplicate this
+    block on separate agents (see docs/AZURE_SETUP.md).
+-->
+
+<ms-graph>
+  <enabled>yes</enabled>
+  <only_future_events>yes</only_future_events>
+  <curl_max_size>10M</curl_max_size>
+  <run_on_start>yes</run_on_start>
+  <interval>5m</interval>
+  <version>v1.0</version>
+  <api_auth>
+    <client_id><YOUR_CLIENT_ID></client_id>
+    <tenant_id><YOUR_TENANT_ID></tenant_id>
+    <secret_value><YOUR_AZURE_SECRET></secret_value>
+    <api_type>global</api_type>
+  </api_auth>
+  <resource>
+    <name>security</name>
+    <relationship>alerts_v2</relationship>
+    <relationship>incidents</relationship>
+  </resource>
+  <!--
+    Optional block: managed device audit logs (Intune).
+    Requires the Azure AD permission DeviceManagementApps.Read.All
+    (NOT DeviceManagementConfiguration.Read.All — a common mistake,
+    see docs/TROUBLESHOOTING.md).
+  -->
+  <resource>
+    <name>deviceManagement</name>
+    <relationship>auditEvents</relationship>
+  </resource>
+</ms-graph>
