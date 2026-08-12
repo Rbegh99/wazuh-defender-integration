@@ -1,0 +1,52 @@
+<!--
+  Blocks to add/edit in the MANAGER's ossec.conf (not the agent).
+  On Wazuh Cloud: Server management > Settings > Edit configuration.
+
+  WARNING — correct syntax:
+  Criteria (level, group) are DIRECT CHILDREN of <email_alerts>,
+  NOT nested inside an <email_alert> tag. This is a common mistake
+  that fails validation (see docs/TROUBLESHOOTING.md).
+
+  WARNING — duplicate emails:
+  The global <email_alert_level> threshold ALREADY triggers an email for
+  ANY alert reaching that level, regardless of source. A separate granular
+  <email_alerts> block ADDS TO this mechanism (it doesn't replace it),
+  causing duplicate emails for alerts matching both criteria.
+  Choose one OR the other, not both at once.
+-->
+
+<global>
+  <email_notification>yes</email_notification>
+  <smtp_server>wazuh-smtp</smtp_server>
+  <email_from>no-reply@wazuh.com</email_from>
+  <email_to><YOUR_EMAIL></email_to>
+  <email_maxperhour>12</email_maxperhour>
+  <email_log_source>alerts.json</email_log_source>
+</global>
+
+<alerts>
+  <log_alert_level>3</log_alert_level>
+  <!--
+    Threshold chosen after testing: 10.
+    At 6, the volume of routine Windows alerts (EventChannel, levels 6-9)
+    flooded the inbox. Level 10 filters out the noise while still
+    catching genuinely significant Defender alerts (observed up to
+    level 15 in real conditions).
+  -->
+  <email_alert_level>10</email_alert_level>
+</alerts>
+
+<!--
+  Option A (in use): global threshold only (above), simple,
+  covers all sources without distinction.
+
+  Option B (not in use, kept for reference): filter by group if you
+  ever want to separate Defender from other sources again. Do NOT
+  combine with a low email_alert_level at the same time (causes
+  duplicates):
+
+  <email_alerts>
+    <level>10</level>
+    <group>ms-graph,</group>
+  </email_alerts>
+-->
